@@ -260,222 +260,254 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* Product Card */}
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
 
-                {/* Product Image Side */}
-                {/* Product Image Side */}
-                <div className="md:w-1/2 bg-gray-100 flex flex-col">
-                    {/* Main Image */}
-                    <div className="relative h-64 md:h-96 w-full bg-gray-200">
-                        {activeImage ? (
-                            <img
-                                src={activeImage}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <Package className="w-16 h-16" />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Thumbnails */}
-                    {product.images && product.images.length > 1 && (
-                        <div className="flex gap-2 p-4 overflow-x-auto">
-                            {product.images.map((img: string, idx: number) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setActiveImage(img)}
-                                    className={`w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition ${activeImage === img ? 'border-primary' : 'border-transparent'}`}
-                                >
-                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Product Details Side */}
-                <div className="md:w-1/2 p-8 flex flex-col justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-primary font-bold">
-                                {product.sellerName[0]}
-                            </div>
-                            <span className="text-sm text-gray-600">Sold by {product.sellerName}</span>
-                        </div>
-
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-                        <p className="text-gray-600 mb-6 leading-relaxed">
-                            {product.description}
-                        </p>
-
-                        <div className="text-2xl font-bold text-primary mb-8">
-                            ₦{product.price.toLocaleString()}
-                        </div>
-
-                        {/* Physical Delivery Info */}
-                        {product.delivery_info && (
-                            <div className="space-y-3 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                {product.delivery_info.pickup?.enabled && (
-                                    <div className="flex items-start gap-3">
-                                        <MapPin className="w-5 h-5 text-primary mt-0.5" />
-                                        <div>
-                                            <p className="font-medium text-gray-900 text-sm">Available for Cleanup</p>
-                                            <p className="text-gray-600 text-xs">{product.delivery_info.pickup.address}</p>
-                                        </div>
-                                    </div>
-                                )}
-                                {product.delivery_info.delivery?.enabled && (
-                                    <div className="flex items-start gap-3">
-                                        <Truck className="w-5 h-5 text-primary mt-0.5" />
-                                        <div>
-                                            <p className="font-medium text-gray-900 text-sm">Delivery Available</p>
-                                            <p className="text-gray-600 text-xs text-green-600">
-                                                {product.delivery_info.delivery.fee > 0
-                                                    ? `+ ₦${product.delivery_info.delivery.fee.toLocaleString()} Delivery Fee`
-                                                    : 'Free Delivery'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-4">
-                        {/* Input for Email before paying */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Enter your email address</label>
-                            <input
-                                type="email"
-                                placeholder="example@email.com"
-                                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Pay Button */}
-                        <PaystackButton
-                            amount={product.price * 100} // Convert to Kobo
-                            email={email || "customer@example.com"}
-                            publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ""}
-                            onSuccess={handleSuccess}
-                            onClose={handleClose}
-                            text={`Pay ₦${product.price.toLocaleString()}`}
-                        />
-
-                        {/* OR Divider */}
-                        <div className="relative flex py-2 items-center">
-                            <div className="flex-grow border-t border-gray-300"></div>
-                            <span className="flex-shrink mx-4 text-gray-400 text-sm">Or</span>
-                            <div className="flex-grow border-t border-gray-300"></div>
-                        </div>
-
-                        {/* WhatsApp Chat to Buy */}
-                        {product.sellerPhone && (
-                            <a
-                                href={whatsappUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition"
-                            >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
-                                Chat to buy on WhatsApp
-                            </a>
-                        )}
-
-                        <p className="text-center text-xs text-gray-400 mt-4">
-                            Secured by Paystack. 100% Money Back Guarantee.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Reviews Section */}
-            {reviewsEnabled && (
-                <div className="max-w-4xl mx-auto mt-12 bg-white rounded-2xl shadow-xl overflow-hidden p-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
-
-                    <div className="grid md:grid-cols-2 gap-12">
-                        {/* Write Review */}
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Write a Review</h3>
-                            <form onSubmit={handleReviewSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-                                    <div className="flex gap-2">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <button
-                                                key={star}
-                                                type="button"
-                                                onClick={() => setNewReview({ ...newReview, rating: star })}
-                                                className={`text-2xl transition ${star <= newReview.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                                            >
-                                                ★
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                        placeholder="John Doe"
-                                        value={newReview.name}
-                                        onChange={e => setNewReview({ ...newReview, name: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
-                                    <textarea
-                                        required
-                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-24 resize-none"
-                                        placeholder="Share your thoughts..."
-                                        value={newReview.comment}
-                                        onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
-                                    />
-                                </div>
-                                <Button disabled={submittingReview} className="w-full">
-                                    {submittingReview ? 'Submitting...' : 'Submit Review'}
-                                </Button>
-                            </form>
-                        </div>
-
-                        {/* Display Reviews */}
-                        <div className="space-y-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                                {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
-                            </h3>
-                            {reviews.length === 0 ? (
-                                <p className="text-gray-500 italic">No reviews yet. Be the first!</p>
+                    {/* Product Image Side */}
+                    <div className="md:w-1/2 bg-gray-100 flex flex-col">
+                        {/* Main Image */}
+                        <div className="relative h-64 md:h-96 w-full bg-gray-200">
+                            {activeImage ? (
+                                <img
+                                    src={activeImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                />
                             ) : (
-                                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                                    {reviews.map((review) => (
-                                        <div key={review.id} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-semibold text-gray-900">{review.reviewer_name}</span>
-                                                <span className="text-yellow-400 text-sm tracking-widest">
-                                                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                                                </span>
-                                            </div>
-                                            <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
-                                            <span className="text-xs text-gray-400 mt-2 block">
-                                                {new Date(review.created_at).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    ))}
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <Package className="w-16 h-16" />
                                 </div>
                             )}
                         </div>
+
+                        {/* Thumbnails */}
+                        {product.images && product.images.length > 1 && (
+                            <div className="flex gap-2 p-4 overflow-x-auto">
+                                {product.images.map((img: string, idx: number) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setActiveImage(img)}
+                                        className={`w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition ${activeImage === img ? 'border-primary' : 'border-transparent'}`}
+                                    >
+                                        <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Product Details Side */}
+                    <div className="md:w-1/2 p-8 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-primary font-bold">
+                                    {product.sellerName[0]}
+                                </div>
+                                <span className="text-sm text-gray-600">Sold by {product.sellerName}</span>
+                            </div>
+
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+                            <p className="text-gray-600 mb-6 leading-relaxed">
+                                {product.description}
+                            </p>
+
+                            <div className="text-2xl font-bold text-primary mb-8">
+                                ₦{product.price.toLocaleString()}
+                            </div>
+
+                            {/* Physical Delivery Info */}
+                            {product.delivery_info && (
+                                <div className="space-y-3 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    {product.delivery_info.pickup?.enabled && (
+                                        <div className="flex items-start gap-3">
+                                            <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                                            <div>
+                                                <p className="font-medium text-gray-900 text-sm">Available for Cleanup</p>
+                                                <p className="text-gray-600 text-xs">{product.delivery_info.pickup.address}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {product.delivery_info.delivery?.enabled && (
+                                        <div className="flex items-start gap-3">
+                                            <Truck className="w-5 h-5 text-primary mt-0.5" />
+                                            <div>
+                                                <p className="font-medium text-gray-900 text-sm">Delivery Available</p>
+                                                <p className="text-gray-600 text-xs text-green-600">
+                                                    {product.delivery_info.delivery.fee > 0
+                                                        ? `+ ₦${product.delivery_info.delivery.fee.toLocaleString()} Delivery Fee`
+                                                        : 'Free Delivery'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Input for Email before paying */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Enter your email address</label>
+                                <input
+                                    type="email"
+                                    placeholder="example@email.com"
+                                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Pay Button */}
+                            <PaystackButton
+                                amount={product.price * 100} // Convert to Kobo
+                                email={email || "customer@example.com"}
+                                publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ""}
+                                onSuccess={handleSuccess}
+                                onClose={handleClose}
+                                text={`Pay ₦${product.price.toLocaleString()}`}
+                            />
+
+                            {/* OR Divider */}
+                            <div className="relative flex py-2 items-center">
+                                <div className="flex-grow border-t border-gray-300"></div>
+                                <span className="flex-shrink mx-4 text-gray-400 text-sm">Or</span>
+                                <div className="flex-grow border-t border-gray-300"></div>
+                            </div>
+
+                            {/* WhatsApp Chat to Buy */}
+                            {product.sellerPhone && (
+                                <a
+                                    href={whatsappUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition"
+                                >
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+                                    Chat to buy on WhatsApp
+                                </a>
+                            )}
+
+                            <p className="text-center text-xs text-gray-400 mt-4">
+                                Secured by Paystack. 100% Money Back Guarantee.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            )}
+
+                {/* Reviews Section */}
+                {reviewsEnabled && (
+                    <div className="max-w-4xl mx-auto mt-16">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex text-yellow-400 text-lg">
+                                        {reviews.length > 0 ? (
+                                            <>
+                                                {'★'.repeat(Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length))}
+                                                <span className="text-gray-300">
+                                                    {'★'.repeat(5 - Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length))}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-gray-300">★★★★★</span>
+                                        )}
+                                    </div>
+                                    <span className="text-sm text-gray-500">
+                                        Based on {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-12 gap-12">
+                            {/* Review Form (Sidebar on Desktop) */}
+                            <div className="md:col-span-4 lg:col-span-4">
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-8">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+                                    <form onSubmit={handleReviewSubmit} className="space-y-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setNewReview({ ...newReview, rating: star })}
+                                                        className={`p-1 transition-transform hover:scale-110 focus:outline-none ${star <= newReview.rating ? 'text-yellow-400' : 'text-gray-200'}`}
+                                                    >
+                                                        <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none text-sm"
+                                                placeholder="John Doe"
+                                                value={newReview.name}
+                                                onChange={e => setNewReview({ ...newReview, name: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Review</label>
+                                            <textarea
+                                                required
+                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none h-32 resize-none text-sm"
+                                                placeholder="Share your experience with this product..."
+                                                value={newReview.comment}
+                                                onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
+                                            />
+                                        </div>
+                                        <Button disabled={submittingReview} className="w-full h-12 text-base font-medium">
+                                            {submittingReview ? 'Submitting...' : 'Post Review'}
+                                        </Button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {/* Reviews List (Main Content) */}
+                            <div className="md:col-span-8 lg:col-span-8 space-y-6">
+                                {reviews.length === 0 ? (
+                                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                        </div>
+                                        <h3 className="text-gray-900 font-medium text-lg">No reviews yet</h3>
+                                        <p className="text-gray-500">Be the first to share your thoughts!</p>
+                                    </div>
+                                ) : (
+                                    reviews.map((review) => (
+                                        <div key={review.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
+                                                        {review.reviewer_name?.slice(0, 2).toUpperCase() || 'AN'}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-semibold text-gray-900">{review.reviewer_name}</h4>
+                                                        <p className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex text-yellow-400 text-sm">
+                                                    {'★'.repeat(review.rating)}
+                                                    <span className="text-gray-200">{'★'.repeat(5 - review.rating)}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-600 leading-relaxed">{review.comment}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

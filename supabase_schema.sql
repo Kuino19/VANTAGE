@@ -145,3 +145,26 @@ create policy "Reviews are viewable by everyone"
 create policy "Anyone can create reviews"
   on reviews for insert
   with check ( true );
+
+-- 5. Automatic Profile Creation Trigger
+-- This ensures that a profile is ALWAYS created when a user signs up
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, full_name, username, phone, avatar_url)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'username',
+    new.raw_user_meta_data->>'phone',
+    new.raw_user_meta_data->>'avatar_url'
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Trigger the function every time a user is created
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
