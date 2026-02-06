@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {/* Card 1: Total Revenue */}
                 <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-4">
@@ -187,10 +187,10 @@ export default function DashboardPage() {
                                         <td className="px-6 py-4 text-gray-900">₦ {order.amount.toLocaleString()}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'completed'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : order.status === 'pending'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-gray-100 text-gray-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : order.status === 'pending'
+                                                    ? 'bg-yellow-100 text-yellow-800'
+                                                    : 'bg-gray-100 text-gray-800'
                                                 }`}>
                                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                             </span>

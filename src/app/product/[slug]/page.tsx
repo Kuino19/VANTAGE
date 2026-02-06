@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { getBuyMessage, getWhatsAppLink } from '@/lib/whatsapp';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
-import { Package } from 'lucide-react';
+import { Package, Truck, MapPin } from 'lucide-react';
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -19,6 +19,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [paymentRef, setPaymentRef] = useState("");
     const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+    const [activeImage, setActiveImage] = useState<string | null>(null);
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [reviewsEnabled, setReviewsEnabled] = useState(true);
+    const [newReview, setNewReview] = useState({ rating: 5, comment: '', name: '' });
+    const [submittingReview, setSubmittingReview] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -41,6 +46,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     sellerName: profile?.full_name || 'Vantage Seller',
                     sellerPhone: profile?.phone || ''
                 });
+                setActiveImage(data.images?.[0] || data.image_url);
+                setReviewsEnabled(profile?.reviews_enabled ?? true);
+
+                if (profile?.reviews_enabled !== false) {
+                    // Fetch reviews
+                    const { data: reviewsData } = await supabase
+                        .from('reviews')
+                        .select('*')
+                        .eq('product_id', productId)
+                        .order('created_at', { ascending: false });
+                    setReviews(reviewsData || []);
+                }
             }
             setLoading(false);
         };
@@ -107,6 +124,36 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
     const handleClose = () => {
         console.log("Payment closed");
+    };
+
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmittingReview(true);
+        try {
+            const { data, error } = await supabase
+                .from('reviews')
+                .insert([
+                    {
+                        product_id: productId,
+                        rating: newReview.rating,
+                        comment: newReview.comment,
+                        reviewer_name: newReview.name || 'Anonymous'
+                    }
+                ])
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            setReviews([data, ...reviews]);
+            setNewReview({ rating: 5, comment: '', name: '' });
+            alert('Review submitted successfully!');
+        } catch (error: any) {
+            console.error("Review error:", error);
+            alert("Failed to submit review: " + error.message);
+        } finally {
+            setSubmittingReview(false);
+        }
     };
 
     if (paymentSuccess) {
@@ -217,16 +264,35 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
 
                 {/* Product Image Side */}
-                <div className="md:w-1/2 h-64 md:h-auto bg-gray-200 relative">
-                    {product.image_url ? (
-                        <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            <Package className="w-16 h-16" />
+                {/* Product Image Side */}
+                <div className="md:w-1/2 bg-gray-100 flex flex-col">
+                    {/* Main Image */}
+                    <div className="relative h-64 md:h-96 w-full bg-gray-200">
+                        {activeImage ? (
+                            <img
+                                src={activeImage}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <Package className="w-16 h-16" />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Thumbnails */}
+                    {product.images && product.images.length > 1 && (
+                        <div className="flex gap-2 p-4 overflow-x-auto">
+                            {product.images.map((img: string, idx: number) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setActiveImage(img)}
+                                    className={`w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition ${activeImage === img ? 'border-primary' : 'border-transparent'}`}
+                                >
+                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -249,6 +315,34 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         <div className="text-2xl font-bold text-primary mb-8">
                             ₦{product.price.toLocaleString()}
                         </div>
+
+                        {/* Physical Delivery Info */}
+                        {product.delivery_info && (
+                            <div className="space-y-3 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                {product.delivery_info.pickup?.enabled && (
+                                    <div className="flex items-start gap-3">
+                                        <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="font-medium text-gray-900 text-sm">Available for Cleanup</p>
+                                            <p className="text-gray-600 text-xs">{product.delivery_info.pickup.address}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {product.delivery_info.delivery?.enabled && (
+                                    <div className="flex items-start gap-3">
+                                        <Truck className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="font-medium text-gray-900 text-sm">Delivery Available</p>
+                                            <p className="text-gray-600 text-xs text-green-600">
+                                                {product.delivery_info.delivery.fee > 0
+                                                    ? `+ ₦${product.delivery_info.delivery.fee.toLocaleString()} Delivery Fee`
+                                                    : 'Free Delivery'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-4">
@@ -300,6 +394,88 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     </div>
                 </div>
             </div>
+
+            {/* Reviews Section */}
+            {reviewsEnabled && (
+                <div className="max-w-4xl mx-auto mt-12 bg-white rounded-2xl shadow-xl overflow-hidden p-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
+
+                    <div className="grid md:grid-cols-2 gap-12">
+                        {/* Write Review */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Write a Review</h3>
+                            <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                                    <div className="flex gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setNewReview({ ...newReview, rating: star })}
+                                                className={`text-2xl transition ${star <= newReview.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                        placeholder="John Doe"
+                                        value={newReview.name}
+                                        onChange={e => setNewReview({ ...newReview, name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+                                    <textarea
+                                        required
+                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-24 resize-none"
+                                        placeholder="Share your thoughts..."
+                                        value={newReview.comment}
+                                        onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
+                                    />
+                                </div>
+                                <Button disabled={submittingReview} className="w-full">
+                                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                                </Button>
+                            </form>
+                        </div>
+
+                        {/* Display Reviews */}
+                        <div className="space-y-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
+                            </h3>
+                            {reviews.length === 0 ? (
+                                <p className="text-gray-500 italic">No reviews yet. Be the first!</p>
+                            ) : (
+                                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                                    {reviews.map((review) => (
+                                        <div key={review.id} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="font-semibold text-gray-900">{review.reviewer_name}</span>
+                                                <span className="text-yellow-400 text-sm tracking-widest">
+                                                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                                            <span className="text-xs text-gray-400 mt-2 block">
+                                                {new Date(review.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

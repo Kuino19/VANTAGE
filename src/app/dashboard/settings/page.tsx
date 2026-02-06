@@ -75,8 +75,8 @@ export default function SettingsPage() {
                     {activeTab === 'profile' && (
                         <div className="space-y-6">
                             <div className="border-b pb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
-                                <p className="text-sm text-gray-500">Update your public profile details.</p>
+                                <h2 className="text-lg font-semibold text-gray-900">Profile & Store Settings</h2>
+                                <p className="text-sm text-gray-500">Update your public profile and store preferences.</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,6 +117,40 @@ export default function SettingsPage() {
                             <div className="flex justify-end pt-4 border-t border-gray-100">
                                 <Button className="px-8 shadow-md hover:shadow-lg transition-all">Save Changes</Button>
                             </div>
+
+                            {/* Reviews Toggle */}
+                            <div className="pt-4 border-t border-gray-100">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Store Preferences</h3>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-700">Enable Product Reviews</p>
+                                        <p className="text-xs text-gray-500">Allow customers to rate and review your products.</p>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="toggle h-6 w-11 rounded-full border-gray-300 bg-gray-200 checked:bg-primary transition-colors cursor-pointer"
+                                        checked={profile?.reviews_enabled ?? true}
+                                        onChange={async (e) => {
+                                            const enabled = e.target.checked;
+
+                                            // Optimistic update
+                                            setProfile({ ...profile, reviews_enabled: enabled });
+
+                                            const { error } = await supabase
+                                                .from('profiles')
+                                                .update({ reviews_enabled: enabled })
+                                                .eq('id', profile.id);
+
+                                            if (error) {
+                                                console.error("Error updating reviews setting:", error);
+                                                alert("Failed to update setting");
+                                                setProfile({ ...profile, reviews_enabled: !enabled }); // Revert
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
                         </div>
                     )}
 

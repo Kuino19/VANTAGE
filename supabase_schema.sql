@@ -118,3 +118,30 @@ alter table products add column if not exists delivery_key text; -- For static k
 -- 2. Add Access Key to Orders (For View Only protection)
 alter table orders add column if not exists access_key text;
 
+-- 3. Add Multi-Image and Delivery Info (For Physical Products)
+alter table products add column if not exists images text[]; -- Array of image URLs
+alter table products add column if not exists delivery_info jsonb; -- { pickup: { enabled, address }, delivery: { enabled, fee } }
+
+
+-- 4. Add Reviews Feature
+alter table profiles add column if not exists reviews_enabled boolean default true;
+
+create table if not exists reviews (
+  id uuid default uuid_generate_v4() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  product_id uuid references products not null,
+  rating integer check (rating >= 1 and rating <= 5),
+  comment text,
+  reviewer_name text
+);
+
+-- Enable RLS for Reviews
+alter table reviews enable row level security;
+
+create policy "Reviews are viewable by everyone"
+  on reviews for select
+  using ( true );
+
+create policy "Anyone can create reviews"
+  on reviews for insert
+  with check ( true );
