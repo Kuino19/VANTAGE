@@ -25,6 +25,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const [newReview, setNewReview] = useState({ rating: 5, comment: '', name: '' });
     const [submittingReview, setSubmittingReview] = useState(false);
 
+    // Physical Checkout State
+    const [deliveryDetails, setDeliveryDetails] = useState({
+        address: '',
+        city: '',
+        state: '',
+        phone: ''
+    });
+
     useEffect(() => {
         const fetchProduct = async () => {
             const { data, error } = await supabase
@@ -110,13 +118,34 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         amount: product.price,
                         reference: reference.reference,
                         status: 'paid',
-                        access_key: generatedKey // Save the generated key
+                        access_key: generatedKey,
+                        delivery_details: product.delivery_type === 'physical' ? deliveryDetails : null
                     }
                 ]);
 
             if (error) {
                 console.error("Failed to save order:", error);
             }
+
+            // Send Receipt Email
+            await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    product_name: product.name,
+                    price: product.price,
+                    delivery_type: product.delivery_type,
+                    seller_name: product.sellerName,
+                    access_info: {
+                        file_url: product.file_url,
+                        access_key: generatedKey,
+                        delivery_key: product.delivery_key,
+                        reference: reference.reference,
+                        shipping_address: product.delivery_type === 'physical' ? deliveryDetails : null
+                    }
+                })
+            });
         } catch (err) {
             console.error("Order save error:", err);
         }
@@ -351,23 +380,91 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Enter your email address</label>
                                 <input
-                                    type="email"
-                                    placeholder="example@email.com"
-                                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
 
+                            {/* Shipping Address Form (For Physical Products) */}
+                            {product.delivery_type === 'physical' && (
+                                <div className="space-y-4 pt-4 border-t border-gray-100">
+                                    <h3 className="font-medium text-gray-900">Shipping Details</h3>
+
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Full Address</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="123 Main St, Apt 4B"
+                                                className="w-full px-3 py-2 border rounded-md focus:ring-1 focus:ring-primary outline-none text-sm text-gray-900"
+                                                value={deliveryDetails.address}
+                                                onChange={e => setDeliveryDetails({ ...deliveryDetails, address: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Lagos"
+                                                    className="w-full px-3 py-2 border rounded-md focus:ring-1 focus:ring-primary outline-none text-sm text-gray-900"
+                                                    value={deliveryDetails.city}
+                                                    onChange={e => setDeliveryDetails({ ...deliveryDetails, city: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Lagos"
+                                                    className="w-full px-3 py-2 border rounded-md focus:ring-1 focus:ring-primary outline-none text-sm text-gray-900"
+                                                    value={deliveryDetails.state}
+                                                    onChange={e => setDeliveryDetails({ ...deliveryDetails, state: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Phone Number</label>
+                                            <input
+                                                type="tel"
+                                                required
+                                                placeholder="08012345678"
+                                                className="w-full px-3 py-2 border rounded-md focus:ring-1 focus:ring-primary outline-none text-sm text-gray-900"
+                                                value={deliveryDetails.phone}
+                                                onChange={e => setDeliveryDetails({ ...deliveryDetails, phone: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Validation Warning */}
+                            {product.delivery_type === 'physical' &&
+                                (!deliveryDetails.address || !deliveryDetails.city || !deliveryDetails.state || !deliveryDetails.phone || !email) && (
+                                    <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                                        Please fill in all shipping details and email to proceed.
+                                    </p>
+                                )}
+
                             {/* Pay Button */}
-                            <PaystackButton
-                                amount={product.price * 100} // Convert to Kobo
-                                email={email || "customer@example.com"}
-                                publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ""}
-                                onSuccess={handleSuccess}
-                                onClose={handleClose}
-                                text={`Pay ₦${product.price.toLocaleString()}`}
-                            />
+                            {product.delivery_type === 'physical' &&
+                                (!deliveryDetails.address || !deliveryDetails.city || !deliveryDetails.state || !deliveryDetails.phone || !email) ? (
+                                <Button disabled className="w-full h-12 bg-gray-300 cursor-not-allowed">
+                                    Enter Delivery Details to Pay
+                                </Button>
+                            ) : (
+                                <PaystackButton
+                                    amount={product.price * 100} // Convert to Kobo
+                                    email={email || "customer@example.com"}
+                                    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ""}
+                                    onSuccess={handleSuccess}
+                                    onClose={handleClose}
+                                    text={`Pay ₦${product.price.toLocaleString()}`}
+                                />
+                            )}
 
                             {/* OR Divider */}
                             <div className="relative flex py-2 items-center">
@@ -448,7 +545,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <input
                                                 type="text"
                                                 required
-                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none text-sm"
+                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none text-sm text-gray-900"
                                                 placeholder="John Doe"
                                                 value={newReview.name}
                                                 onChange={e => setNewReview({ ...newReview, name: e.target.value })}
@@ -458,7 +555,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Review</label>
                                             <textarea
                                                 required
-                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none h-32 resize-none text-sm"
+                                                className="w-full px-4 py-3 bg-gray-50 border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary/10 focus:border-primary transition outline-none h-32 resize-none text-sm text-gray-900"
                                                 placeholder="Share your experience with this product..."
                                                 value={newReview.comment}
                                                 onChange={e => setNewReview({ ...newReview, comment: e.target.value })}

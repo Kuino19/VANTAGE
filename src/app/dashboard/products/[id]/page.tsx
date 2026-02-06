@@ -177,7 +177,7 @@ export default function EditProductPage() {
                             <input
                                 type="text"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
@@ -185,7 +185,7 @@ export default function EditProductPage() {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                             <textarea
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-32 transition resize-none"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-32 transition resize-none text-gray-900"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
@@ -202,7 +202,7 @@ export default function EditProductPage() {
                                 <input
                                     type="number"
                                     required
-                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
                                 />
@@ -219,7 +219,7 @@ export default function EditProductPage() {
                                 <input
                                     type="number"
                                     min="0"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
                                 />

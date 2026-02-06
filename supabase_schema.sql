@@ -117,6 +117,7 @@ alter table products add column if not exists delivery_key text; -- For static k
 
 -- 2. Add Access Key to Orders (For View Only protection)
 alter table orders add column if not exists access_key text;
+alter table orders add column if not exists delivery_details jsonb; -- For physical shipping info
 
 -- 3. Add Multi-Image and Delivery Info (For Physical Products)
 alter table products add column if not exists images text[]; -- Array of image URLs

@@ -183,7 +183,7 @@ export default function CreateProductPage() {
                                 type="text"
                                 required
                                 placeholder="e.g. Vintage Denim Jacket"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
@@ -193,7 +193,7 @@ export default function CreateProductPage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                             <textarea
                                 placeholder="Describe your product... dimensions, material, condition etc."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-32 transition resize-none"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary h-32 transition resize-none text-gray-900"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
@@ -211,7 +211,7 @@ export default function CreateProductPage() {
                                     type="number"
                                     required
                                     placeholder="0.00"
-                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
                                 />
@@ -278,7 +278,7 @@ export default function CreateProductPage() {
                                 <input
                                     type="number"
                                     min="0"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-gray-900"
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
                                 />
@@ -302,7 +302,7 @@ export default function CreateProductPage() {
                                             <input
                                                 type="text"
                                                 placeholder="Enter pickup address / area"
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900"
                                                 value={pickupAddress}
                                                 onChange={(e) => setPickupAddress(e.target.value)}
                                             />
@@ -329,7 +329,7 @@ export default function CreateProductPage() {
                                                 <input
                                                     type="number"
                                                     placeholder="Delivery Fee"
-                                                    className="w-full pl-8 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                                    className="w-full pl-8 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900"
                                                     value={deliveryFee}
                                                     onChange={(e) => setDeliveryFee(e.target.value)}
                                                 />

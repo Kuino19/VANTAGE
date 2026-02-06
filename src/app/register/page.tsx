@@ -54,6 +54,23 @@ export default function RegisterPage() {
                 }
             }
 
+            // 3. Send Welcome Email
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'welcome',
+                        email: email,
+                        name: fullName,
+                        username: username
+                    })
+                });
+            } catch (emailError) {
+                console.error("Failed to send welcome email:", emailError);
+                // Don't block registration flow if email fails
+            }
+
             alert("Registration successful! Please check your email to verify your account.");
             router.push("/login");
 
@@ -98,7 +115,7 @@ export default function RegisterPage() {
                                     required
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-gray-900"
                                 />
                             </div>
                         </div>
@@ -118,7 +135,7 @@ export default function RegisterPage() {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                                     placeholder="my-store"
-                                    className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-primary focus:border-primary sm:text-sm"
+                                    className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-primary focus:border-primary sm:text-sm text-gray-900"
                                 />
                             </div>
                             <p className="mt-1 text-xs text-gray-500">This will be your unique store URL.</p>
@@ -139,7 +156,7 @@ export default function RegisterPage() {
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     placeholder="2348012345678"
-                                    className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-gray-900"
                                 />
                             </div>
                         </div>
@@ -156,7 +173,7 @@ export default function RegisterPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-gray-900"
                                 />
                             </div>
                         </div>
@@ -172,7 +189,7 @@ export default function RegisterPage() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-gray-900"
                                 />
                             </div>
                         </div>
