@@ -153,8 +153,8 @@ export default function ExplorePage() {
                     <div className="text-center py-20">
                         <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
                         <Button
-                            variant="link"
-                            className="mt-2 text-primary"
+                            variant="ghost"
+                            className="mt-2 text-primary hover:text-primary/80"
                             onClick={() => { setActiveCategory("All"); setSearchQuery(""); }}
                         >
                             Clear Filters
